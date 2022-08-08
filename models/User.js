@@ -1,5 +1,5 @@
 'use strict';
-
+const usersCollection = require('../db').collection('users');
 const validator = require('validator');
 
 let User = function (data) {
@@ -8,6 +8,26 @@ let User = function (data) {
 };
 
 // Methods of constructor function User
+
+User.prototype.cleanUp = function () {
+  if (typeof this.data.username != 'string') {
+    this.data.username = '';
+  }
+  if (typeof this.data.email != 'string') {
+    this.data.email = '';
+  }
+  if (typeof this.data.password != 'string') {
+    this.data.password = '';
+  }
+
+  // get rid of any bogus properties
+
+  this.data = {
+    username: this.data.username.trim().toLowerCase(),
+    email: this.data.email.trim().toLowerCase(),
+    password: this.data.password,
+  };
+};
 
 User.prototype.validate = function () {
   if (this.data.username === '') {
@@ -25,8 +45,8 @@ User.prototype.validate = function () {
   if (this.data.password === '') {
     this.errors.push('You must provide a password.');
   }
-  if (this.data.password.length > 0 && this.data.password.length < 12) {
-    this.errors.push('Password must be at least 12 characters.');
+  if (this.data.password.length > 0 && this.data.password.length < 3) {
+    this.errors.push('Password must be at least 3 characters.');
   }
   if (this.data.password.length > 100) {
     this.errors.push('Password cannot exceed 100 characters.');
@@ -42,8 +62,15 @@ User.prototype.validate = function () {
 User.prototype.register = function () {
   // Step #1: Validate user data
 
+  this.cleanUp();
   this.validate();
+
   // Step #2: Only if there is no validation errors
+
+  if (!this.errors.length) {
+    usersCollection.insertOne(this.data);
+  }
+
   // then save the user data into a database
   //
 };

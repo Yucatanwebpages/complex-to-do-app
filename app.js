@@ -13,4 +13,4 @@ app.use('/public', express.static('public'));
 
 app.use('/', router);
 
-app.listen(3000);
+module.exports = app;
